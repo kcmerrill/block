@@ -1,4 +1,4 @@
-[![Bravo](bravo.jpg "Bravo")]
+![Bravo](bravo.jpg "Bravo")
 
 # Bravo
 
