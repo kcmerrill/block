@@ -120,7 +120,7 @@ func Search(cmd, category, query string) {
 	}
 
 	// winner?
-	fmt.Println(b.flow.category, b.flow.name)
+	fmt.Println(b.flow.category, b.flow.origName)
 }
 
 func (b *block) score(category, name string) {
@@ -196,7 +196,13 @@ func (b *block) score(category, name string) {
 	// we have a winner?
 	if score > b.flow.score {
 		b.lock.Lock()
-		b.flow = flow{score: score, category: category, name: name, scoring: scoring}
+		b.flow = flow{
+			score:    score,
+			category: category,
+			origName: origName,
+			name:     name,
+			scoring:  scoring,
+		}
 		b.lock.Unlock()
 		fmt.Println(score, category, origName, scoring)
 	}
