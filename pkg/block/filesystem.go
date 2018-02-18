@@ -29,6 +29,7 @@ func (b *block) filesystem(category, dir string, ignore map[string]bool) {
 	}
 
 	godirwalk.Walk(dir, &godirwalk.Options{
+		Unsorted: true,
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
 			if de.IsDir() {
 				for ignoreDir := range ignore {

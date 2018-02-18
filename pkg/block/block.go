@@ -81,25 +81,25 @@ func Search(cmd, category, query string) {
 	fmt.Println("queryRegEx: ", b.queryRegExStr)
 
 	var wg sync.WaitGroup
+	/*
+		wg.Add(1)
+		go func() {
+			b.filesystem("/bin/bash -c", b.blockDir, b.ignore)
+			wg.Done()
+		}()
 
-	wg.Add(1)
-	go func() {
-		b.filesystem("/bin/bash -c", b.blockDir, b.ignore)
-		wg.Done()
-	}()
+		wg.Add(1)
+		go func() {
+			b.filesystem("open", b.rootDir, b.ignore)
+			wg.Done()
+		}()
 
-	wg.Add(1)
-	go func() {
-		b.filesystem("open", b.rootDir, b.ignore)
-		wg.Done()
-	}()
-
-	wg.Add(1)
-	go func() {
-		b.filesystem("open", b.searchDir, b.ignore)
-		wg.Done()
-	}()
-
+		wg.Add(1)
+		go func() {
+			b.filesystem("open", b.searchDir, b.ignore)
+			wg.Done()
+		}()
+	*/
 	wg.Add(1)
 	go func() {
 		b.filesystem("open", "/", b.ignore)
