@@ -44,10 +44,13 @@ $ b vim inventory.go
 $ b inventory.go // will `open path/to/inventory.go`
 ```
 
-## Downloads
-![Mac OSX](https://raw.githubusercontent.com/kcmerrill/go-dist/master/assets/apple_logo.png "Mac OSX") [386](http://go-dist.kcmerrill.com/kcmerrill/block/mac/386) | [amd64](http://go-dist.kcmerrill.com/kcmerrill/block/mac/amd64)
+## Binaries || Installation
 
-![Linux](https://raw.githubusercontent.com/kcmerrill/go-dist/master/assets/linux_logo.png "Linux") [386](http://go-dist.kcmerrill.com/kcmerrill/block/linux/386) | [amd64](http://go-dist.kcmerrill.com/kcmerrill/block/linux/amd64)
+[![MacOSX](https://raw.githubusercontent.com/kcmerrill/go-dist/master/assets/apple_logo.png "Mac OSX")](http://go-dist.kcmerrill.com/kcmerrill/block/mac/amd64) [![Linux](https://raw.githubusercontent.com/kcmerrill/go-dist/master/assets/linux_logo.png "Linux")](http://go-dist.kcmerrill.com/kcmerrill/block/linux/amd64)
+
+via go:
+
+`$ go get -u github.com/kcmerrill/block`
 
 ## Thoughts
 
