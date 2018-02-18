@@ -2,6 +2,7 @@ package block
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -83,8 +84,10 @@ func Search(cmd, category, query string) {
 
 	var wg sync.WaitGroup
 
+	// this is seriously dumb ... lets refactor yo
 	wg.Add(1)
 	go func() {
+		// the crappiest plugin system ever, but we can figure this out later
 		b.filesystem("/bin/bash -c", b.blockDir, b.ignore)
 		wg.Done()
 	}()
@@ -101,11 +104,18 @@ func Search(cmd, category, query string) {
 		wg.Done()
 	}()
 
-	wg.Add(1)
-	go func() {
-		b.filesystem("open", "/", b.ignore)
-		wg.Done()
-	}()
+	dirs, _ := ioutil.ReadDir("/")
+	for _, d := range dirs {
+		dirPath := "/" + d.Name()
+		if b.isDirIgnored(d.Name(), dirPath) {
+			continue
+		}
+		wg.Add(1)
+		go func(dir string) {
+			b.filesystem("open", dir, b.ignore)
+			wg.Done()
+		}(dirPath)
+	}
 
 	wg.Add(1)
 	go func() {

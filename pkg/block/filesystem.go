@@ -22,6 +22,24 @@ func (b *block) dirs(category, dir string) {
 	}
 }
 
+func (b *block) isDirIgnored(name, osPathname string) bool {
+	for ignoreDir := range b.ignore {
+		if string(ignoreDir[0]) == "/" && strings.HasPrefix(osPathname, ignoreDir) {
+			return true
+		}
+		if strings.Contains(osPathname, ignoreDir) {
+			return true
+		}
+	}
+
+	// hidden folders
+	if len(name) >= 3 && string(name[0]) == "." {
+		return true
+	}
+
+	return false
+}
+
 func (b *block) filesystem(category, dir string, ignore map[string]bool) {
 	// validate it exists
 	if _, exists := os.Stat(dir); exists != nil {
@@ -32,20 +50,9 @@ func (b *block) filesystem(category, dir string, ignore map[string]bool) {
 		Unsorted: true,
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
 			if de.IsDir() {
-				for ignoreDir := range ignore {
-					if string(ignoreDir[0]) == "/" && strings.HasPrefix(osPathname, ignoreDir) {
-						return filepath.SkipDir
-					}
-					if strings.Contains(osPathname, ignoreDir) {
-						return filepath.SkipDir
-					}
-				}
-
-				// hidden folders
-				if len(de.Name()) >= 3 && string(de.Name()[0]) == "." {
+				if b.isDirIgnored(de.Name(), osPathname) {
 					return filepath.SkipDir
 				}
-
 				// score it
 				b.score("cd", osPathname)
 			} else {
