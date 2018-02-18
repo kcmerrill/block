@@ -81,25 +81,25 @@ func Search(cmd, category, query string) {
 	fmt.Println("queryRegEx: ", b.queryRegExStr)
 
 	var wg sync.WaitGroup
-	/*
-		wg.Add(1)
-		go func() {
-			b.filesystem("/bin/bash -c", b.blockDir, b.ignore)
-			wg.Done()
-		}()
 
-		wg.Add(1)
-		go func() {
-			b.filesystem("open", b.rootDir, b.ignore)
-			wg.Done()
-		}()
+	wg.Add(1)
+	go func() {
+		b.filesystem("/bin/bash -c", b.blockDir, b.ignore)
+		wg.Done()
+	}()
 
-		wg.Add(1)
-		go func() {
-			b.filesystem("open", b.searchDir, b.ignore)
-			wg.Done()
-		}()
-	*/
+	wg.Add(1)
+	go func() {
+		b.filesystem("open", b.rootDir, b.ignore)
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		b.filesystem("open", b.searchDir, b.ignore)
+		wg.Done()
+	}()
+
 	wg.Add(1)
 	go func() {
 		b.filesystem("open", "/", b.ignore)
@@ -181,7 +181,7 @@ func (b *block) score(category, name string) {
 	// we have a winner?
 	if score > b.flow.score {
 		b.lock.Lock()
-		b.flow = flow{score: score, category: category, name: origName}
+		b.flow = flow{score: score, category: category, name: name}
 		b.lock.Unlock()
 		fmt.Println(score, category, origName)
 	}
