@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -126,6 +127,8 @@ func (b *block) score(category, name string) {
 	// ghetto analytics yall
 	// :D
 	score := 0
+	scoring := make([]string, 0)
+
 	origName := name
 	if b.category == "cd" && category != "cd" {
 		// no need to do anything if the user doesn't want anything but directories
@@ -145,8 +148,10 @@ func (b *block) score(category, name string) {
 	if strings.Contains(name, b.query) {
 		// exact matches should get a boost
 		score += 4
+		scoring = append(scoring, "+4 exact match")
 	} else {
 		if b.queryRegEx.Match([]byte(name)) {
+			scoring = append(scoring, "+1 fuzzy match")
 			score++
 		}
 	}
@@ -159,30 +164,40 @@ func (b *block) score(category, name string) {
 	modifier, exists := b.scoring[category]
 	if exists {
 		score += modifier
+		scoring = append(scoring, "+"+strconv.Itoa(b.scoring[category])+" category modifier")
 	}
 
 	// do we want a directory?
 	if b.category == category {
 		score++
+		scoring = append(scoring, "+1 category match")
 	}
 
 	// boost if it ends with what we wanted
 	if strings.HasSuffix(name, b.query) {
 		score++
+		scoring = append(scoring, "+1 suffix match")
 	}
 
-	// score equal? which one is shorter?
+	// same directory? lets boost it
+	if strings.HasPrefix(origName, b.rootDir) {
+		score += 2
+		scoring = append(scoring, "+2 same dir match")
+	}
+
+	// score equal? which one is shorter closer to where youy are? <-- really shitty folks. really shitty. lol
 	if score == b.flow.score {
 		if len(name) < len(b.flow.name) {
 			score++
+			scoring = append(scoring, "+1 len is shorter(tie breaker)")
 		}
 	}
 
 	// we have a winner?
 	if score > b.flow.score {
 		b.lock.Lock()
-		b.flow = flow{score: score, category: category, name: name}
+		b.flow = flow{score: score, category: category, name: name, scoring: scoring}
 		b.lock.Unlock()
-		fmt.Println(score, category, origName)
+		fmt.Println(score, category, origName, scoring)
 	}
 }
