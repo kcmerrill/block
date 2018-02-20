@@ -24,14 +24,17 @@ type block struct {
 	homeDir       string
 	blockDir      string
 	category      string
+	debug         bool
+	checked       map[string]bool
 }
 
 // Search something
-func Search(cmd, category, query string) {
+func Search(cmd, category, query string, debug bool) {
 	b := block{
 		query:         strings.ToLower(query),
 		queryRegExStr: strings.Join(strings.Split(query, ""), ".*?"), // fuzzy matching
 		category:      category,
+		checked:       make(map[string]bool),
 		ignore: map[string]bool{
 			// could get large  .... but I think it's worth it(for now)
 			"/Library":      true,
@@ -54,6 +57,7 @@ func Search(cmd, category, query string) {
 		scoring: map[string]int{
 			"cmd": 2,
 		},
+		debug:    debug,
 		lock:     sync.Mutex{},
 		homeDir:  os.Getenv("HOME"),
 		blockDir: os.Getenv("HOME") + "/block/",
@@ -88,31 +92,31 @@ func Search(cmd, category, query string) {
 	wg.Add(1)
 	go func() {
 		// the crappiest plugin system ever, but we can figure this out later
-		b.filesystem("/bin/bash -c", b.blockDir, b.ignore)
+		b.filesystem("/bin/bash -c", b.blockDir, 1)
 		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
-		b.filesystem("open", b.rootDir, b.ignore)
+		b.filesystem("open", b.rootDir, 0)
 		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
-		b.filesystem("open", b.searchDir, b.ignore)
+		b.filesystem("open", b.searchDir, 0)
 		wg.Done()
 	}()
 
 	dirs, _ := ioutil.ReadDir("/")
 	for _, d := range dirs {
 		dirPath := "/" + d.Name()
-		if b.isDirIgnored(d.Name(), dirPath) {
+		if isDirIgnored(d.Name(), dirPath, b.ignore) {
 			continue
 		}
 		wg.Add(1)
 		go func(dir string) {
-			b.filesystem("open", dir, b.ignore)
+			b.filesystem("open", dir, 0)
 			wg.Done()
 		}(dirPath)
 	}
@@ -124,36 +128,28 @@ func Search(cmd, category, query string) {
 	}()
 
 	wg.Wait()
-
-	if category != "" {
-		b.flow.category = category
-	}
-
-	// winner?
-	fmt.Println(b.flow.category, b.flow.origName)
 }
 
-func (b *block) score(category, name string) {
+func (b *block) score(category, basepath, name string, boost int) {
+	if name == b.rootDir {
+		// no need to do anything with the current directory
+		return
+	}
+
+	if b.category == "cd" && category != "cd" {
+		// no need to do anything if the user doesn't want anything but directories
+		return
+	}
+
 	// ghetto analytics yall
 	// :D
 	score := 0
 	scoring := make([]string, 0)
 
 	origName := name
-	if b.category == "cd" && category != "cd" {
-		// no need to do anything if the user doesn't want anything but directories
-		return
-	}
-
-	if name == b.rootDir {
-		// no need to do anything with the current directory
-		return
-	}
 
 	// lets strip off the root directory if it exists
-	if category != "cmd" {
-		name = strings.ToLower(strings.Replace(name, b.rootDir, "", 1))
-	}
+	name = strings.ToLower(strings.Replace(name, basepath, "", 1))
 
 	if strings.Contains(name, b.query) {
 		// exact matches should get a boost
@@ -185,8 +181,8 @@ func (b *block) score(category, name string) {
 
 	// boost if it ends with what we wanted
 	if strings.HasSuffix(name, b.query) {
-		score++
-		scoring = append(scoring, "+1 suffix match")
+		score += 2
+		scoring = append(scoring, "+2 suffix match")
 	}
 
 	// same directory? lets boost it
@@ -195,16 +191,25 @@ func (b *block) score(category, name string) {
 		scoring = append(scoring, "+2 same dir match")
 	}
 
-	// score equal? which one is shorter closer to where youy are? <-- really shitty folks. really shitty. lol
-	if score == b.flow.score {
-		if len(name) < len(b.flow.name) {
-			score++
-			scoring = append(scoring, "+1 len is shorter(tie breaker)")
-		}
+	// add the boost(usually based on the directory)
+	if boost > 0 {
+		score += boost
+		scoring = append(scoring, "+"+strconv.Itoa(boost)+" boost")
+	}
+
+	if b.debug {
+		fmt.Println("#DEBUG", score, category, origName)
 	}
 
 	// we have a winner?
-	if score > b.flow.score {
+	if score >= b.flow.score {
+		if score == b.flow.score {
+			if len(name) >= len(b.flow.name) {
+				return
+			}
+			scoring = append(scoring, "+1 len is shorter(tie breaker)")
+		}
+
 		b.lock.Lock()
 		b.flow = flow{
 			score:    score,
@@ -213,7 +218,13 @@ func (b *block) score(category, name string) {
 			name:     name,
 			scoring:  scoring,
 		}
+		if category != "" {
+			b.flow.category = category
+		}
+
+		fmt.Println("#RANKED", b.flow.score, b.flow.category, b.flow.origName, scoring)
+		// winner?
+		fmt.Println(b.flow.category, b.flow.origName)
 		b.lock.Unlock()
-		fmt.Println(score, category, origName, scoring)
 	}
 }

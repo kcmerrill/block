@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/karrick/godirwalk"
 )
@@ -18,29 +17,11 @@ func (b *block) dirs(category, dir string) {
 	// We only need top level of directories for this callout
 	dirs, _ := ioutil.ReadDir(dir)
 	for _, d := range dirs {
-		b.score(category, dir+d.Name())
+		b.score(category, dir, dir+d.Name(), 0)
 	}
 }
 
-func (b *block) isDirIgnored(name, osPathname string) bool {
-	for ignoreDir := range b.ignore {
-		if string(ignoreDir[0]) == "/" && strings.HasPrefix(osPathname, ignoreDir) {
-			return true
-		}
-		if strings.Contains(osPathname, ignoreDir) {
-			return true
-		}
-	}
-
-	// hidden folders
-	if len(name) >= 3 && string(name[0]) == "." {
-		return true
-	}
-
-	return false
-}
-
-func (b *block) filesystem(category, dir string, ignore map[string]bool) {
+func (b *block) filesystem(category, dir string, boost int) {
 	// validate it exists
 	if _, exists := os.Stat(dir); exists != nil {
 		return
@@ -50,14 +31,19 @@ func (b *block) filesystem(category, dir string, ignore map[string]bool) {
 		Unsorted: true,
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
 			if de.IsDir() {
-				if b.isDirIgnored(de.Name(), osPathname) {
+				if isDirIgnored(de.Name(), osPathname, b.ignore) {
 					return filepath.SkipDir
 				}
 				// score it
-				b.score("cd", osPathname)
+				b.score("cd", dir, osPathname, boost)
+
+				// ignore it next time(directory wise)
+				b.lock.Lock()
+				b.checked[osPathname] = true
+				b.lock.Unlock()
 			} else {
 				// score it
-				b.score(category, osPathname)
+				b.score(category, dir, osPathname, boost)
 			}
 			return nil
 		},
