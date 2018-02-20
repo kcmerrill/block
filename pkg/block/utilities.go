@@ -2,8 +2,8 @@ package block
 
 import "strings"
 
-func isDirIgnored(name, osPathname string, ignored map[string]bool) bool {
-	for ignoreDir := range ignored {
+func isDirIgnored(name, osPathname string, ignored []string) bool {
+	for _, ignoreDir := range ignored {
 		if string(ignoreDir[0]) == "/" && strings.HasPrefix(osPathname, ignoreDir) {
 			return true
 		}

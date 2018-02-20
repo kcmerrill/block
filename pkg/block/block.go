@@ -16,7 +16,7 @@ type block struct {
 	query         string
 	queryRegEx    *regexp.Regexp
 	queryRegExStr string
-	ignore        map[string]bool
+	ignore        []string
 	scoring       map[string]int
 	lock          sync.Mutex
 	rootDir       string
@@ -35,24 +35,30 @@ func Search(cmd, category, query string, debug bool) {
 		queryRegExStr: strings.Join(strings.Split(query, ""), ".*?"), // fuzzy matching
 		category:      category,
 		checked:       make(map[string]bool),
-		ignore: map[string]bool{
+		ignore: []string{
 			// could get large  .... but I think it's worth it(for now)
-			"/Library":      true,
-			"/dev":          true,
-			"/cores":        true,
-			"/var":          true,
-			"/Network":      true,
-			"/System":       true,
-			"/Volumes":      true,
-			"/etc":          true,
-			"/net":          true,
-			"/private":      true,
-			"/usr":          true,
-			"/sbin":         true,
-			"/Applications": true,
-			".git/":         true,
-			"vendor/":       true,
-			"Downloads/":    true,
+			"/tmp/",
+			"/Library",
+			"/dev",
+			"/cores",
+			"/var",
+			"/Network",
+			"/System",
+			"/Volumes",
+			"/etc",
+			"/net",
+			"/private",
+			"/opt",
+			"/usr",
+			"/sbin",
+			"/Applications",
+			"/.git/",
+			"vendor/",
+			"Downloads/",
+			"/node_modules/",
+			"/gems/",
+			"/go/pkg/dep/",
+			"/cache/",
 		},
 		scoring: map[string]int{
 			"cmd": 2,
@@ -63,7 +69,7 @@ func Search(cmd, category, query string, debug bool) {
 		blockDir: os.Getenv("HOME") + "/block/",
 		flow: flow{
 			category: "echo",
-			name:     "Unable to find anything.",
+			name:     "[BLOCK] No results found ... Try broadening your search",
 		},
 	}
 
@@ -85,6 +91,8 @@ func Search(cmd, category, query string, debug bool) {
 
 	fmt.Println("query: ", b.query)
 	fmt.Println("queryRegEx: ", b.queryRegExStr)
+	fmt.Println("#DEFAULT-REPSPONSE", b.flow.category, b.flow.name)
+	fmt.Println(b.flow.category, b.flow.name)
 
 	var wg sync.WaitGroup
 
@@ -131,6 +139,10 @@ func Search(cmd, category, query string, debug bool) {
 }
 
 func (b *block) score(category, basepath, name string, boost int) {
+	if b.debug {
+		fmt.Println("#SCORED", category, name)
+	}
+
 	if name == b.rootDir {
 		// no need to do anything with the current directory
 		return
@@ -198,7 +210,7 @@ func (b *block) score(category, basepath, name string, boost int) {
 	}
 
 	if b.debug {
-		fmt.Println("#DEBUG", score, category, origName)
+		fmt.Println("#DEBUG-RANKED", score, category, origName)
 	}
 
 	// we have a winner?
@@ -218,8 +230,9 @@ func (b *block) score(category, basepath, name string, boost int) {
 			name:     name,
 			scoring:  scoring,
 		}
-		if category != "" {
-			b.flow.category = category
+
+		if b.category != "" {
+			b.flow.category = b.category
 		}
 
 		fmt.Println("#RANKED", b.flow.score, b.flow.category, b.flow.origName, scoring)

@@ -27,6 +27,7 @@ func (b *block) filesystem(category, dir string, boost int) {
 		return
 	}
 
+	// these boots are made for walking ...
 	godirwalk.Walk(dir, &godirwalk.Options{
 		Unsorted: true,
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
@@ -36,11 +37,6 @@ func (b *block) filesystem(category, dir string, boost int) {
 				}
 				// score it
 				b.score("cd", dir, osPathname, boost)
-
-				// ignore it next time(directory wise)
-				b.lock.Lock()
-				b.checked[osPathname] = true
-				b.lock.Unlock()
 			} else {
 				// score it
 				b.score(category, dir, osPathname, boost)
