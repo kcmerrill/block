@@ -63,3 +63,7 @@ This is just a simple POC. So the code is gnarly. Like, really gnarly. No tests,
 * Would be sweet if block could "learn" your behaviors
 * I feel like there is some machine learning I could utilize in here. That'd be awesome!
 * Attach it to global keystrokes(or wrap your terminal session)
+
+
+# After 2 months
+* The results are in. I use this a lot. Way more than I thought. I hope to continue working on this for a while, the current version of this is great, but I do plan on upgrading to a proper application :D
