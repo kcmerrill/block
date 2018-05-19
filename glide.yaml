@@ -1,4 +1,0 @@
-package: github.com/kcmerrill/block
-import:
-- package: github.com/karrick/godirwalk
-  version: ^1.3.0

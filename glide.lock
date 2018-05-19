@@ -1,8 +1,0 @@
-hash: 2252cd1cfc479073c3cd111ac3dda96c64068a525b70f35ede29fe06f0b4ad81
-updated: 2018-02-16T22:12:24.649492-07:00
-imports:
-- name: github.com/karrick/godirwalk
-  version: 17c244300a0e2101858b851a8df1ae8e796a0bca
-- name: github.com/pkg/errors
-  version: 30136e27e2ac8d167177e8a583aa4c3fea5be833
-testImports: []
