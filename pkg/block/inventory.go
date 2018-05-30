@@ -2,6 +2,8 @@ package block
 
 import (
 	"os"
+
+	"github.com/karrick/godirwalk"
 )
 
 func filesystem(dir string) {
