@@ -1,28 +1,45 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/kcmerrill/block/pkg/block"
 )
 
 func main() {
-	files := make(chan string)
-	finished := make(chan bool)
-	go block.Inventory("./", files, finished, []string{}, []string{})
 
-	for {
-		var done bool
-		select {
-		case <-time.After(1 * time.Second):
-			done = true
-		case done = <-finished:
-		case file := <-files:
-			fmt.Println(file)
-		}
-		if done {
-			break
-		}
+	ignoreIfContains := []string{
+		"/.git/",
+		"/vendor/",
+		"/node_modules/",
+		"/gems/",
+		"/go/pkg/",
+		"/cache/",
+		"/library/",
+		"downloads/",
+		"/applications/",
+		"/album artwork/",
+		".app/",
+		"/.", // controversial. Don't @ me
 	}
+
+	ignoreIfStartsWith := []string{
+		"/network",
+		"/system",
+		"/volumes",
+		"/bin",
+		"/cores",
+		"/dev",
+		"/keybase",
+		"/net",
+		"/opt",
+		"/private",
+		"/usr",
+		"/var",
+		"/sbin",
+	}
+
+	query := "inventory.go"
+	action := "cd"
+	block.New(query, action, "/", 1*time.Second, ignoreIfContains, ignoreIfStartsWith)
 }

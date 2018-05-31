@@ -1,29 +1,17 @@
 package block
 
-func score(category, basepath, name string, boost int) int {
-	/*if b.debug {
-		fmt.Println("#SCORED", category, name)
-	}
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
 
-	if name == b.rootDir {
-		// no need to do anything with the current directory
-		return
-	}
-
-	if b.category == "cd" && category != "cd" {
-		// no need to do anything if the user doesn't want anything but directories
-		return
-	}
-
-	// ghetto analytics yall
-	// :D
+func (b *Block) score(inventory Inventory) {
 	score := 0
 	scoring := make([]string, 0)
 
-	origName := name
-
 	// lets strip off the root directory if it exists
-	name = strings.ToLower(strings.Replace(name, basepath, "", 1))
+	name := strings.Replace(inventory.FileNameLowerCase, b.cwd, "", 1)
 
 	if strings.Contains(name, b.query) {
 		// exact matches should get a boost
@@ -39,18 +27,6 @@ func score(category, basepath, name string, boost int) int {
 	if score == 0 {
 		// no need to go on ... drop it on the floor
 		return
-	}
-
-	modifier, exists := b.scoring[category]
-	if exists {
-		score += modifier
-		scoring = append(scoring, "+"+strconv.Itoa(b.scoring[category])+" category modifier")
-	}
-
-	// do we want a directory?
-	if b.category == category {
-		score++
-		scoring = append(scoring, "+1 category match")
 	}
 
 	// boost if it ends with what we wanted
@@ -102,7 +78,4 @@ func score(category, basepath, name string, boost int) int {
 		fmt.Println(b.flow.category, b.flow.origName)
 		b.lock.Unlock()
 	}
-
-	*/
-	return 0
 }
