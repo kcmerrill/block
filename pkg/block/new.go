@@ -1,41 +1,43 @@
 package block
 
 import (
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
-	"time"
+	"sync"
 )
 
 // New ...
-func New(query, dir string, timeout time.Duration, ignoreIfContains, ignoreIfStartsWith []string) {
+func New(b *Block) {
 	cwd, _ := os.Getwd()
-	b := &Block{
-		inventory:          make(chan *Inventory),
-		completed:          make(chan bool),
-		ignoreIfContains:   ignoreIfContains,
-		ignoreIfStartsWith: ignoreIfStartsWith,
-		cwd:                strings.ToLower(cwd),
-		timeout:            timeout,
-		query:              query,
-		queryRegExStr:      strings.Join(strings.Split(query, ""), ".*?"), // fuzzy matching
+
+	b.queryRegExStr = strings.Join(strings.Split(b.Query, ""), ".*?") // fuzzy matching
+	b.cwd = strings.ToLower(cwd)
+	b.inventory = make(chan *Inventory)
+	b.completed = make(chan bool)
+	b.lock = &sync.Mutex{}
+	b.debugLock = &sync.Mutex{}
+	b.maxInventory = &Inventory{
+		Type:     "echo",
+		FileName: "[BLOCK] No results found ... Try broadening your search",
+		Score:    1,
+		Scoring:  []string{"+1 Default"},
 	}
 
 	b.queryRegEx = regexp.MustCompile(b.queryRegExStr)
-	go b.FindInventory("/")
 
-	count := 0
-	for {
-		var done bool
-		select {
-		case <-time.After(b.timeout):
-			done = true
-		case done = <-b.completed:
-		case <-b.inventory:
-			count++
-		}
-		if done {
-			break
-		}
-	}
+	b.debugMsg("Query", b.Query)
+	b.debugMsg("Fuzzy", b.queryRegExStr)
+	b.debugMsg("Dir", b.cwd)
+
+	b.processInventory()
+
+	b.debugMsg("Found", b.maxInventory.FileName)
+	b.debugMsg("Reasons", strings.Join(b.maxInventory.Scoring, ", "))
+
+	fmt.Println(strings.Join(b.debugMsgs, "\n"))
+
+	// lets do something!
+	fmt.Println(b.act(b.maxInventory))
 }

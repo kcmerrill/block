@@ -1,6 +1,7 @@
 package block
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,11 +11,14 @@ import (
 
 // Inventory ...
 type Inventory struct {
-	Type              string
-	Dir               string
-	File              string
-	FileName          string
-	FileNameLowerCase string
+	Type                   string
+	Dir                    string
+	File                   string
+	FileNameWithoutBaseDir string
+	FileName               string
+	FileNameLowerCase      string
+	Score                  int
+	Scoring                []string
 }
 
 // FindInventory ...
@@ -40,16 +44,22 @@ func (b *Block) FindInventory(dir string) {
 			}
 
 			if de.IsDir() {
-				for _, contains := range b.ignoreIfContains {
+				for _, contains := range b.IgnoreIfContains {
 					if strings.Contains(i.FileNameLowerCase, contains) {
 						// we should skip it
+						if b.Debug {
+							fmt.Println(i.FileName, fmt.Sprintf("skipping, contains '%s'", contains))
+						}
 						return filepath.SkipDir
 					}
 				}
 
-				for _, startsWith := range b.ignoreIfStartsWith {
+				for _, startsWith := range b.IgnoreIfStartsWith {
 					if strings.HasPrefix(i.FileNameLowerCase, startsWith) {
 						// we should skip it
+						if b.Debug {
+							fmt.Println(i.FileName, fmt.Sprintf("skipping, starts with '%s'", startsWith))
+						}
 						return filepath.SkipDir
 					}
 				}

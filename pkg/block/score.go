@@ -2,80 +2,73 @@ package block
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 )
 
-func (b *Block) score(inventory Inventory) {
-	score := 0
-	scoring := make([]string, 0)
+func (b *Block) score(inventory *Inventory) {
+	inventory.Scoring = make([]string, 0)
 
 	// lets strip off the root directory if it exists
-	name := strings.Replace(inventory.FileNameLowerCase, b.cwd, "", 1)
+	inventory.FileNameWithoutBaseDir = strings.Replace(inventory.FileNameLowerCase, b.cwd, "", 1)
 
-	if strings.Contains(name, b.query) {
+	if strings.Contains(inventory.FileNameWithoutBaseDir, b.Query) {
 		// exact matches should get a boost
-		score += 4
-		scoring = append(scoring, "+4 exact match")
+		inventory.Score += 4
+		inventory.Scoring = append(inventory.Scoring, "+4 exact match")
 	} else {
-		if b.queryRegEx.Match([]byte(name)) {
-			scoring = append(scoring, "+1 fuzzy match")
-			score++
+		if b.queryRegEx.Match([]byte(inventory.FileNameWithoutBaseDir)) {
+			inventory.Scoring = append(inventory.Scoring, "+1 fuzzy match")
+			inventory.Score++
 		}
 	}
 
-	if score == 0 {
+	if inventory.Score == 0 {
 		// no need to go on ... drop it on the floor
+		if b.Debug {
+			fmt.Println(inventory.FileName, "did not match exactly or fuzzy.")
+		}
 		return
 	}
 
+	// are we trying to switch directories? If so .. lets boost it
+	if b.Action == "cd" && inventory.Type == "directory" {
+		inventory.Score++
+		inventory.Scoring = append(inventory.Scoring, "+1 action match")
+	}
+
+	if b.Action != "cd" && inventory.Type != "directory" {
+		inventory.Score++
+		inventory.Scoring = append(inventory.Scoring, "+1 action match")
+	}
+
 	// boost if it ends with what we wanted
-	if strings.HasSuffix(name, b.query) {
-		score += 2
-		scoring = append(scoring, "+2 suffix match")
+	if strings.HasSuffix(inventory.FileName, b.Query) {
+		inventory.Score += 2
+		inventory.Scoring = append(inventory.Scoring, "+2 suffix match")
 	}
 
 	// same directory? lets boost it
-	if strings.HasPrefix(origName, b.rootDir) {
-		score += 2
-		scoring = append(scoring, "+2 same dir match")
-	}
-
-	// add the boost(usually based on the directory)
-	if boost > 0 {
-		score += boost
-		scoring = append(scoring, "+"+strconv.Itoa(boost)+" boost")
-	}
-
-	if b.debug {
-		fmt.Println("#DEBUG-RANKED", score, category, origName)
+	if strings.HasPrefix(inventory.FileName, b.cwd) {
+		inventory.Score += 2
+		inventory.Scoring = append(inventory.Scoring, "+2 same dir match")
 	}
 
 	// we have a winner?
-	if score >= b.flow.score {
-		if score == b.flow.score {
-			if len(name) >= len(b.flow.name) {
+	if inventory.Score >= b.maxInventory.Score {
+		if inventory.Score == b.maxInventory.Score {
+			// TODO: shortness is messed up here I believe
+			if len(inventory.FileNameWithoutBaseDir) >= len(b.maxInventory.FileNameWithoutBaseDir) {
 				return
 			}
-			scoring = append(scoring, "+1 len is shorter(tie breaker)")
+			inventory.Scoring = append(inventory.Scoring, "+1 len is shorter(tie breaker)")
 		}
 
 		b.lock.Lock()
-		b.flow = flow{
-			score:    score,
-			category: category,
-			origName: origName,
-			name:     name,
-			scoring:  scoring,
-		}
-
-		if b.category != "" {
-			b.flow.category = b.category
-		}
-
-		fmt.Println("#RANKED", b.flow.score, b.flow.category, b.flow.origName, scoring)
-		// winner?
-		fmt.Println(b.flow.category, b.flow.origName)
+		b.maxInventory = inventory
 		b.lock.Unlock()
+	}
+
+	if b.Debug {
+		fmt.Println("#", inventory.FileName, strings.Join(inventory.Scoring, "\n"))
 	}
 }
