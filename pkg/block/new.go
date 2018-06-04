@@ -6,11 +6,14 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/mitchellh/go-homedir"
 )
 
 // New ...
 func New(b *Block) {
 	cwd, _ := os.Getwd()
+	homeDir, _ := homedir.Dir()
 
 	b.queryRegExStr = strings.Join(strings.Split(b.Query, ""), ".*?") // fuzzy matching
 	b.cwd = strings.ToLower(cwd)
@@ -26,6 +29,15 @@ func New(b *Block) {
 	}
 
 	b.queryRegEx = regexp.MustCompile(b.queryRegExStr)
+	b.boost = map[string]int{
+		strings.ToLower(homeDir) + "/block/": 2,
+	}
+	b.override = map[string]string{
+		strings.ToLower(homeDir) + "/block": "bash",
+		"/code/": "code",
+	}
+
+	b.config()
 
 	b.debugMsg("Query", b.Query)
 	b.debugMsg("Fuzzy", b.queryRegExStr)

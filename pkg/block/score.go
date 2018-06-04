@@ -2,6 +2,7 @@ package block
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -51,6 +52,14 @@ func (b *Block) score(inventory *Inventory) {
 	if strings.HasPrefix(inventory.FileName, b.cwd) {
 		inventory.Score += 2
 		inventory.Scoring = append(inventory.Scoring, "+2 same dir match")
+	}
+
+	for dir, boosted := range b.boost {
+		if strings.HasPrefix(inventory.FileNameLowerCase, dir) {
+			inventory.Score += boosted
+			inventory.Scoring = append(inventory.Scoring, "+"+strconv.Itoa(boosted)+" boosted by '"+dir+"'")
+			break
+		}
 	}
 
 	// we have a winner?

@@ -52,18 +52,15 @@ via go:
 
 `$ go get -u github.com/kcmerrill/block`
 
-## Thoughts
+## Configuration
 
-This is just a simple POC. So the code is gnarly. Like, really gnarly. No tests, no grouping, it doesn't really make sense. I am however curious to see if I will use this as much as I told myself I will. If I do end up using this as part of my daily workflow, then I want to add a bunch of features. 
+In your home directory, you can place a `block/block.yml` file where you can override and boost certain folders or files with key/values. The key is simply something that the file will start with, and the value is the command to override with. Of course, if you specify an action on the CLI that will be used instead of this file. 
 
-* Plugins(like mac's quicksilver for email/music/etc)
-* Make it faster
-* Refactor
-* Add a bunch of tests
-* Would be sweet if block could "learn" your behaviors
-* I feel like there is some machine learning I could utilize in here. That'd be awesome!
-* Attach it to global keystrokes(or wrap your terminal session)
+Boosting is the same. If the file starts with the key, the value will be boosted by the int value. Boosting will bump up the file in priority.
 
-
-# After 2 months
-* The results are in. I use this a lot. Way more than I thought. I hope to continue working on this for a while, the current version of this is great, but I do plan on upgrading to a proper application :D
+```yaml
+overrides:
+  "/code/": "vim"
+boost:
+  "/code/": 100
+```

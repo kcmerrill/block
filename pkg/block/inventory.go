@@ -65,6 +65,11 @@ func (b *Block) FindInventory(dir string) {
 				}
 
 				i.Type = "directory"
+			} else {
+				if b.Action == "cd" {
+					// we shouldn't omit anything, the user is looking for a directory, this is a file ...
+					return nil
+				}
 			}
 
 			// process the bit of inventory

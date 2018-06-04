@@ -3,6 +3,7 @@ package block
 import (
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -25,6 +26,8 @@ type Block struct {
 	maxInventory  *Inventory
 	lock          *sync.Mutex
 	debugLock     *sync.Mutex
+	boost         map[string]int
+	override      map[string]string
 }
 
 func (b *Block) debugMsg(subject, msg string) {
@@ -52,11 +55,12 @@ func (b *Block) processInventory() {
 		}
 	}
 
-	b.debugMsg("#Scored:", strconv.Itoa(count))
+	b.debugMsg("#Scored", strconv.Itoa(count))
 }
 
 func (b *Block) act(inventory *Inventory) string {
-	cmd := b.Action
+
+	cmd := ""
 	if inventory.Type == "directory" {
 		cmd = "cd"
 	}
@@ -64,6 +68,21 @@ func (b *Block) act(inventory *Inventory) string {
 	if inventory.Type != "directory" && inventory.Type != "file" {
 		// we should use it
 		cmd = inventory.Type
+	}
+
+	for startsWith, override := range b.override {
+		if strings.HasPrefix(inventory.FileNameLowerCase, startsWith) {
+			cmd = override
+			break
+		}
+	}
+
+	if b.Action != "" {
+		cmd = b.Action
+	}
+
+	if cmd == "" {
+		cmd = "open"
 	}
 
 	return cmd + " " + inventory.FileName

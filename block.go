@@ -27,7 +27,7 @@ func main() {
 		fmt.Println("echo Must provide a valid search query.")
 		os.Exit(1)
 	case 1:
-		action = "open"
+		action = ""
 		query = args[0]
 	case 2:
 		action = args[0]
@@ -39,10 +39,10 @@ func main() {
 		"/vendor/",
 		"/node_modules/",
 		"/gems/",
-		"/go/pkg/",
+		"/go/pkg/", // hmmm ... just me?
 		"/cache/",
 		"/library/",
-		"downloads/",
+		"downloads/", // could be iffy ...
 		"/applications/",
 		"/album artwork/",
 		".app/",
