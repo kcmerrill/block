@@ -22,10 +22,10 @@ func New(b *Block) {
 	b.lock = &sync.Mutex{}
 	b.debugLock = &sync.Mutex{}
 	b.maxInventory = &Inventory{
-		Type:     "echo",
-		FileName: "[BLOCK] No results found ... Try broadening your search",
-		Score:    1,
-		Scoring:  []string{"+1 Default"},
+		Type:    "echo",
+		Action:  "[BLOCK] No results found ... Try broadening your search",
+		Score:   1,
+		Scoring: []string{"+1 Default"},
 	}
 
 	b.queryRegEx = regexp.MustCompile(b.queryRegExStr)
@@ -44,7 +44,7 @@ func New(b *Block) {
 
 	b.processInventory()
 
-	b.debugMsg("Found", b.maxInventory.FileName)
+	b.debugMsg("Found", b.maxInventory.Action)
 	b.debugMsg("Reasons", strings.Join(b.maxInventory.Scoring, ", "))
 
 	fmt.Println(strings.Join(b.debugMsgs, "\n"))

@@ -1,4 +1,8 @@
 package: github.com/kcmerrill/block
 import:
+- package: github.com/ghodss/yaml
 - package: github.com/karrick/godirwalk
-  version: ^1.7.0
+- package: github.com/kcmerrill/common.go
+  subpackages:
+  - config
+- package: github.com/mitchellh/go-homedir

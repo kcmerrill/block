@@ -10,14 +10,14 @@ func (b *Block) score(inventory *Inventory) {
 	inventory.Scoring = make([]string, 0)
 
 	// lets strip off the root directory if it exists
-	inventory.ActionModified = strings.Replace(inventory.FileNameLowerCase, b.cwd, "", 1)
+	inventory.ActionShortened = strings.Replace(inventory.ActionLowerCase, b.cwd, "", 1)
 
-	if strings.Contains(inventory.ActionModified, b.Query) {
+	if strings.Contains(inventory.ActionShortened, b.Query) {
 		// exact matches should get a boost
 		inventory.Score += 4
 		inventory.Scoring = append(inventory.Scoring, "+4 exact match")
 	} else {
-		if b.queryRegEx.Match([]byte(inventory.ActionModified)) {
+		if b.queryRegEx.Match([]byte(inventory.ActionShortened)) {
 			inventory.Scoring = append(inventory.Scoring, "+1 fuzzy match")
 			inventory.Score++
 		}
@@ -26,7 +26,7 @@ func (b *Block) score(inventory *Inventory) {
 	if inventory.Score == 0 {
 		// no need to go on ... drop it on the floor
 		if b.Debug {
-			fmt.Println(inventory.FileName, "did not match exactly or fuzzy.")
+			fmt.Println(inventory.Action, "did not match exactly or fuzzy.")
 		}
 		return
 	}
@@ -43,19 +43,19 @@ func (b *Block) score(inventory *Inventory) {
 	}
 
 	// boost if it ends with what we wanted
-	if strings.HasSuffix(inventory.FileName, b.Query) {
+	if strings.HasSuffix(inventory.Action, b.Query) {
 		inventory.Score += 2
 		inventory.Scoring = append(inventory.Scoring, "+2 suffix match")
 	}
 
 	// same directory? lets boost it
-	if strings.HasPrefix(inventory.FileName, b.cwd) {
+	if strings.HasPrefix(inventory.Action, b.cwd) {
 		inventory.Score += 2
 		inventory.Scoring = append(inventory.Scoring, "+2 same dir match")
 	}
 
 	for dir, boosted := range b.boost {
-		if strings.HasPrefix(inventory.FileNameLowerCase, dir) {
+		if strings.HasPrefix(inventory.ActionLowerCase, dir) {
 			inventory.Score += boosted
 			inventory.Scoring = append(inventory.Scoring, "+"+strconv.Itoa(boosted)+" boosted by '"+dir+"'")
 			break
@@ -66,7 +66,7 @@ func (b *Block) score(inventory *Inventory) {
 	if inventory.Score >= b.maxInventory.Score {
 		if inventory.Score == b.maxInventory.Score {
 			// TODO: shortness is messed up here I believe
-			if len(inventory.ActionModified) >= len(b.maxInventory.ActionModified) {
+			if len(inventory.ActionShortened) >= len(b.maxInventory.ActionShortened) {
 				return
 			}
 			inventory.Scoring = append(inventory.Scoring, "+1 len is shorter(tie breaker)")
@@ -78,6 +78,6 @@ func (b *Block) score(inventory *Inventory) {
 	}
 
 	if b.Debug {
-		fmt.Println("#", inventory.FileName, strings.Join(inventory.Scoring, "\n"))
+		fmt.Println("#", inventory.Action, strings.Join(inventory.Scoring, "\n"))
 	}
 }

@@ -71,7 +71,7 @@ func (b *Block) act(inventory *Inventory) string {
 	}
 
 	for startsWith, override := range b.override {
-		if strings.HasPrefix(inventory.FileNameLowerCase, startsWith) {
+		if strings.HasPrefix(inventory.ActionLowerCase, startsWith) {
 			cmd = override
 			break
 		}
@@ -85,5 +85,5 @@ func (b *Block) act(inventory *Inventory) string {
 		cmd = "open"
 	}
 
-	return cmd + " " + inventory.FileName
+	return cmd + " " + inventory.Action
 }

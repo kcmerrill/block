@@ -38,7 +38,6 @@ func main() {
 		"/cache/",
 		"/library/",
 		"downloads/", // could be iffy ...
-		"/applications/",
 		"/album artwork/",
 		".app/",
 		"/.", // controversial. Don't @ me
@@ -58,6 +57,7 @@ func main() {
 		"/usr",
 		"/var",
 		"/sbin",
+		"/applications/",
 	}
 
 	b := &block.Block{

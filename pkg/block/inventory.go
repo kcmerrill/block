@@ -11,16 +11,13 @@ import (
 
 // Inventory ...
 type Inventory struct {
-	Type              string
-	Dir               string
-	Action            string
-	ActionLowerCase   string
-	ActionModified    string
-	File              string
-	FileName          string
-	FileNameLowerCase string
-	Score             int
-	Scoring           []string
+	Type            string
+	Dir             string
+	Action          string
+	ActionLowerCase string
+	ActionShortened string
+	Score           int
+	Scoring         []string
 }
 
 // FindInventory ...
@@ -38,29 +35,29 @@ func (b *Block) FindInventory(dir string) {
 		},
 		Callback: func(osPathname string, de *godirwalk.Dirent) error {
 			i := &Inventory{
-				Type:              "file",
-				File:              de.Name(),
-				FileName:          osPathname,
-				FileNameLowerCase: strings.ToLower(osPathname),
-				Dir:               osPathname,
+				Type:            "file",
+				ActionShortened: de.Name(),
+				Action:          osPathname,
+				ActionLowerCase: strings.ToLower(osPathname),
+				Dir:             osPathname,
 			}
 
 			if de.IsDir() {
 				for _, contains := range b.IgnoreIfContains {
-					if strings.Contains(i.FileNameLowerCase, contains) {
+					if strings.Contains(i.ActionLowerCase, contains) {
 						// we should skip it
 						if b.Debug {
-							fmt.Println(i.FileName, fmt.Sprintf("skipping, contains '%s'", contains))
+							fmt.Println(i.Action, fmt.Sprintf("skipping, contains '%s'", contains))
 						}
 						return filepath.SkipDir
 					}
 				}
 
 				for _, startsWith := range b.IgnoreIfStartsWith {
-					if strings.HasPrefix(i.FileNameLowerCase, startsWith) {
+					if strings.HasPrefix(i.ActionLowerCase, startsWith) {
 						// we should skip it
 						if b.Debug {
-							fmt.Println(i.FileName, fmt.Sprintf("skipping, starts with '%s'", startsWith))
+							fmt.Println(i.Action, fmt.Sprintf("skipping, starts with '%s'", startsWith))
 						}
 						return filepath.SkipDir
 					}
