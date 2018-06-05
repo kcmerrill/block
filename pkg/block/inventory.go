@@ -11,14 +11,16 @@ import (
 
 // Inventory ...
 type Inventory struct {
-	Type                   string
-	Dir                    string
-	File                   string
-	FileNameWithoutBaseDir string
-	FileName               string
-	FileNameLowerCase      string
-	Score                  int
-	Scoring                []string
+	Type              string
+	Dir               string
+	Action            string
+	ActionLowerCase   string
+	ActionModified    string
+	File              string
+	FileName          string
+	FileNameLowerCase string
+	Score             int
+	Scoring           []string
 }
 
 // FindInventory ...

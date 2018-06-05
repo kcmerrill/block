@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -14,17 +13,13 @@ func main() {
 	debug := flag.Bool("debug", false, "Debug")
 	flag.Parse()
 
-	fmt.Println("debug", *debug)
 	var query string
 	var action string
 
 	args := flag.Args()
 
-	fmt.Println("args:", args)
 	switch len(args) {
 	case 0:
-		// TODO: Make pretty, figure out proper exit code
-		fmt.Println("echo Must provide a valid search query.")
 		os.Exit(1)
 	case 1:
 		action = ""

@@ -10,14 +10,14 @@ func (b *Block) score(inventory *Inventory) {
 	inventory.Scoring = make([]string, 0)
 
 	// lets strip off the root directory if it exists
-	inventory.FileNameWithoutBaseDir = strings.Replace(inventory.FileNameLowerCase, b.cwd, "", 1)
+	inventory.ActionModified = strings.Replace(inventory.FileNameLowerCase, b.cwd, "", 1)
 
-	if strings.Contains(inventory.FileNameWithoutBaseDir, b.Query) {
+	if strings.Contains(inventory.ActionModified, b.Query) {
 		// exact matches should get a boost
 		inventory.Score += 4
 		inventory.Scoring = append(inventory.Scoring, "+4 exact match")
 	} else {
-		if b.queryRegEx.Match([]byte(inventory.FileNameWithoutBaseDir)) {
+		if b.queryRegEx.Match([]byte(inventory.ActionModified)) {
 			inventory.Scoring = append(inventory.Scoring, "+1 fuzzy match")
 			inventory.Score++
 		}
@@ -66,7 +66,7 @@ func (b *Block) score(inventory *Inventory) {
 	if inventory.Score >= b.maxInventory.Score {
 		if inventory.Score == b.maxInventory.Score {
 			// TODO: shortness is messed up here I believe
-			if len(inventory.FileNameWithoutBaseDir) >= len(b.maxInventory.FileNameWithoutBaseDir) {
+			if len(inventory.ActionModified) >= len(b.maxInventory.ActionModified) {
 				return
 			}
 			inventory.Scoring = append(inventory.Scoring, "+1 len is shorter(tie breaker)")

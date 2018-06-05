@@ -34,7 +34,6 @@ func New(b *Block) {
 	}
 	b.override = map[string]string{
 		strings.ToLower(homeDir) + "/block": "bash",
-		"/code/": "code",
 	}
 
 	b.config()
