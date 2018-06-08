@@ -14,7 +14,7 @@ import (
 // Home directory config file
 func Home(query, extension string) ([]byte, error) {
 	h, _ := homedir.Dir()
-	h += h + "/" + query + "/" + query + extension
+	h += "/" + query + "/" + query + extension
 
 	if _, err := os.Stat(h); err == nil {
 		if contents, err := ioutil.ReadFile(h); err == nil {
