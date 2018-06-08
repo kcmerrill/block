@@ -54,7 +54,7 @@ func (b *Block) score(inventory *Inventory) {
 		inventory.Scoring = append(inventory.Scoring, "+2 same dir match")
 	}
 
-	for dir, boosted := range b.boost {
+	for dir, boosted := range b.Boosted {
 		if strings.HasPrefix(inventory.ActionLowerCase, dir) {
 			inventory.Score += boosted
 			inventory.Scoring = append(inventory.Scoring, "+"+strconv.Itoa(boosted)+" boosted by '"+dir+"'")

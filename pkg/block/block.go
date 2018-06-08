@@ -16,6 +16,8 @@ type Block struct {
 	Timeout            time.Duration
 	Action             string
 	Debug              bool
+	Boosted            map[string]int
+	Overrides          map[string]string
 
 	debugMsgs     []string
 	inventory     chan *Inventory
@@ -26,8 +28,6 @@ type Block struct {
 	maxInventory  *Inventory
 	lock          *sync.Mutex
 	debugLock     *sync.Mutex
-	boost         map[string]int
-	override      map[string]string
 }
 
 func (b *Block) debugMsg(subject, msg string) {
@@ -70,7 +70,7 @@ func (b *Block) act(inventory *Inventory) string {
 		cmd = inventory.Type
 	}
 
-	for startsWith, override := range b.override {
+	for startsWith, override := range b.Overrides {
 		if strings.HasPrefix(inventory.ActionLowerCase, startsWith) {
 			cmd = override
 			break

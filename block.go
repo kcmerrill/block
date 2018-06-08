@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kcmerrill/block/pkg/block"
+	homedir "github.com/mitchellh/go-homedir"
 )
 
 func main() {
@@ -60,6 +61,15 @@ func main() {
 		"/applications/",
 	}
 
+	homeDir, _ := homedir.Dir()
+
+	boostDirs := map[string]int{
+		strings.ToLower(homeDir) + "/block/": 2,
+	}
+	overrideDirs := map[string]string{
+		strings.ToLower(homeDir) + "/block": "bash -c",
+	}
+
 	b := &block.Block{
 		IgnoreIfContains:   ignoreIfContains,
 		IgnoreIfStartsWith: ignoreIfStartsWith,
@@ -67,6 +77,8 @@ func main() {
 		Query:              strings.ToLower(query),
 		Action:             action,
 		Debug:              *debug,
+		Boosted:            boostDirs,
+		Overrides:          overrideDirs,
 	}
 
 	block.New(b)
