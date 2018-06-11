@@ -12,6 +12,8 @@ In short, why do I use this library?
 
 ## Usage Example
 
+Additional examples are provided in the `examples/` subdirectory.
+
 This library will normalize the provided top level directory name
 based on the os-specific path separator by calling `filepath.Clean` on
 its first argument. However it always provides the pathname created by
@@ -161,6 +163,8 @@ Windows.
 
 ### It's more flexible than `filepath.Walk`
 
+#### Configurable Handling of Symbolic Links
+
 The default behavior of this library is to ignore symbolic links to
 directories when walking a directory tree, just like `filepath.Walk`
 does. However, it does invoke the callback function with each node it
@@ -168,6 +172,8 @@ finds, including symbolic links. If a particular use case exists to
 follow symbolic links when traversing a directory tree, this library
 can be invoked in manner to do so, by setting the
 `FollowSymbolicLinks` parameter to true.
+
+#### Configurable Sorting of Directory Children
 
 The default behavior of this library is to always sort the immediate
 descendants of a directory prior to visiting each node, just like
@@ -177,3 +183,20 @@ directory node has many entries. If a particular use case exists that
 does not require sorting the directory's immediate descendants prior
 to visiting its nodes, this library will skip the sorting step when
 the `Unsorted` parameter is set to true.
+
+#### Configurable Post Children Callback
+
+This library provides upstream code with the ability to specify a
+callback to be invoked for each directory after its children are
+processed. This has been used to recursively delete empty directories
+after traversing the file system in a more efficient manner. See the
+`examples/clean-empties` directory for an example of this usage.
+
+#### Configurable Error Callback
+
+This library provides upstream code with the ability to specify a
+callback to be invoked for errors that the operating system returns,
+allowing the upstream code to determine the next course of action to
+take, whether to halt walking the hierarchy, as it would do were no
+error callback provided, or skip the node that caused the error. See
+the `examples/walk-fast` directory for an example of this usage.
