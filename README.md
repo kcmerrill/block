@@ -54,9 +54,9 @@ via go:
 
 ## Configuration
 
-In your home directory, you can place a `block/block.yml` file where you can override and boost certain folders or files with key/values. The key is simply something that the file will start with, and the value is the command to override with. Of course, if you specify an action on the CLI that will be used instead of this file. 
+In your home directory, you can place a `~/block/block.yml` file where you can override and boost certain folders or files with key/values. The key is simply something that the file will start with, and the value is the command to override with. Of course, if you specify an action on the CLI that will be used instead of this file. 
 
-Boosting is the same. If the file starts with the key, the value will be boosted by the int value. Boosting will bump up the file in priority.
+Boosting is the same. If the file starts with the key, the value will be boosted by the int value provided. Boosting will bump the inventory score.
 
 ```yaml
 overrides:
