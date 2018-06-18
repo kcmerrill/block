@@ -24,7 +24,7 @@ func main() {
 	case 0:
 		os.Exit(1)
 	case 1:
-		action = *defaultCommand
+		action = ""
 		query = args[0]
 	case 2:
 		action = args[0]
