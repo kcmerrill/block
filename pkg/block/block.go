@@ -18,6 +18,7 @@ type Block struct {
 	Debug              bool
 	Boosted            map[string]int
 	Overrides          map[string]string
+	DefaultCommand     string
 
 	debugMsgs     []string
 	inventory     chan *Inventory
@@ -79,10 +80,6 @@ func (b *Block) act(inventory *Inventory) string {
 
 	if b.Action != "" {
 		cmd = b.Action
-	}
-
-	if cmd == "" {
-		cmd = "open"
 	}
 
 	return cmd + " " + inventory.Action

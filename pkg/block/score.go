@@ -78,6 +78,6 @@ func (b *Block) score(inventory *Inventory) {
 	}
 
 	if b.Debug {
-		fmt.Println("#", inventory.Action, strings.Join(inventory.Scoring, "\n"))
+		fmt.Println("scored:", inventory.Action, strings.Join(inventory.Scoring, "\n"))
 	}
 }

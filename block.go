@@ -12,6 +12,7 @@ import (
 
 func main() {
 	debug := flag.Bool("debug", false, "Debug")
+	defaultCommand := flag.String("default-command", "open", "The default command to use. 'cd' would be another alternative.")
 	flag.Parse()
 
 	var query string
@@ -23,7 +24,7 @@ func main() {
 	case 0:
 		os.Exit(1)
 	case 1:
-		action = ""
+		action = *defaultCommand
 		query = args[0]
 	case 2:
 		action = args[0]
@@ -79,6 +80,7 @@ func main() {
 		Debug:              *debug,
 		Boosted:            boostDirs,
 		Overrides:          overrideDirs,
+		DefaultCommand:     *defaultCommand,
 	}
 
 	block.New(b)
